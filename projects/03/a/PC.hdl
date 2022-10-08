@@ -17,4 +17,9 @@ CHIP PC {
 
     PARTS:
     // Put your code here:
+    ALU(x=state,y=true,zx=false,nx=true,zy=true,ny=true,f=true,no=true,out=incState);
+    Mux16(a=state,b=incState,sel=inc,out=incState2);
+    Mux16(a=incState2,b=in,sel=load,out=loadState);
+    Mux16(a=loadState,b=false,sel=reset,out=resetState);
+    Register(in=resetState,load=true,out=state,out=out);
 }
