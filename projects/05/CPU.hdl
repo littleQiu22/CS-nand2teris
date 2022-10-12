@@ -40,4 +40,52 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+
+    Not(in=instruction[15],out=isAIns);
+    Not(in=isAIns,out=isCIns);
+
+    // multiplex between instruction and ALU output for A register
+    // when instruction is A-instruction, value in instruction should be written in A register
+    // when instruction is C-instruction and A register is dest, then ALU output should be written in A register
+    Mux16(a=ALUOut,b=instruction,sel=isAIns,out=mulForAReg);
+
+    // A register
+    // when A-instruction or C-instruction with dest A, then A register should be written
+    And(a=instruction[5],b=isCIns,out=isCInsAndADest);
+    Or(a=isAIns,b=isCInsAndADest,out=isAWritten);
+    Register(in=mulForAReg,load=isAWritten,out=AOut,out[0..14]=addressM);
+
+
+    // multiplex for A/M
+    // if instruction is C-instruction and M is used in comp section, then memory is read
+    And(a=instruction[12],b=isCIns,out=isCInsAndM);
+    Mux16(a=AOut,b=inM,sel=isCInsAndM,out=AOrMOut);
+
+    // for ALU
+    ALU(x=DOut,y=AOrMOut,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],out=ALUOut,out=outM,zr=ALUZr,ng=ALUNg);
+
+
+    // write into memory when C-instruction and M is dest
+    And(a=instruction[3],b=isCIns,out=writeM);
+
+    // D register
+    // when instruction is C-instruction and D is dest, ALU output should be written in D register
+    And(a=instruction[4],b=isCIns,out=isCInsAndDDest);
+    DRegister(in=ALUOut,load=isCInsAndDDest,out=DOut);
+
+    // PC
+    // when instruction is C-instruction and jumping conditions is satisfied, then jump, otherwise increase except for reset case
+    Or(a=ALUNg,b=ALUZr,out=ALUNotPos);
+    Not(in=ALUNotPos,out=ALUPos);
+    And(a=instruction[0],b=ALUPos,out=cond1);
+    And(a=instruction[1],b=ALUZr,out=cond2);
+    And(a=instruction[2],b=ALUNg,out=cond3);
+    Or(a=cond1,b=cond2,out=cond12);
+    Or(a=cond12,b=cond3,out=jump);
+    And(a=isCIns,b=jump,out=isCInsAndJump);
+    Not(in=isCInsAndJump,out=notJump);
+    PC(in=AOut,load=isCInsAndJump,inc=notJump,reset=reset,out[0..14]=pc);
+
+
+
 }
