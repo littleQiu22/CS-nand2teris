@@ -53,7 +53,7 @@ CHIP CPU {
     // when A-instruction or C-instruction with dest A, then A register should be written
     And(a=instruction[5],b=isCIns,out=isCInsAndADest);
     Or(a=isAIns,b=isCInsAndADest,out=isAWritten);
-    Register(in=mulForAReg,load=isAWritten,out=AOut,out[0..14]=addressM);
+    ARegister(in=mulForAReg,load=isAWritten,out=AOut,out[0..14]=addressM);
 
 
     // multiplex for A/M
