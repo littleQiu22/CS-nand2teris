@@ -8,8 +8,9 @@
             "type": "java",
             "name": "Launch VMTranslator",
             "request": "launch",
-            "mainClass": "VMTranslator",
-            "projectName": "nand2tetris_ea5e649"
+            "mainClass": "nand2tetris.VMTranslator.Main",
+            "projectName": "nand2tetris_ea5e649",
+            "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/07/MemoryAccess/BasicTest/BasicTest.vm"
         },
         {
             "type": "java",
@@ -19,7 +20,7 @@
         },
         {
             "type": "java",
-            "name": "Launch Main",
+            "name": "Launch HackAssembler",
             "request": "launch",
             "mainClass": "nand2tetris.HackAssembler.Main",
             "projectName": "nand2tetris_ea5e649",

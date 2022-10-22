@@ -12,9 +12,10 @@ public class Parser {
     public static final int C_ARITHMETIC=0;
     public static final int C_PUSH_SEGMENT=1;
     public static final int C_PUSH_CONSTANT=2;
-    public static final int C_POP=3;
+    public static final int C_POP_SEGMENT=3;
+    public static final int C_POP_CONSTANT=4;
 
-    private String command=null;
+    private String command;
 
     public Parser(){}
 
@@ -37,7 +38,11 @@ public class Parser {
                 return C_PUSH_SEGMENT;
             }
         }else if("pop".equals(operand)){
-            return C_POP;
+            if("constant".equals(getArg1())){
+                return C_POP_CONSTANT;
+            }else{
+                return C_POP_SEGMENT;
+            }
         }else{
             return -1;
         }
@@ -54,12 +59,12 @@ public class Parser {
         }
     }
 
-    public int getArg2(){
+    public String getArg2(){
         String[] fields=command.split(" ");
         if(fields.length<=2){
-            return -1;
+            return null;
         }else{
-            return Integer.valueOf(fields[2]);
+            return fields[2];
         }
     }
 
