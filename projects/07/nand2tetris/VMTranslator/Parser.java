@@ -8,9 +8,11 @@ package nand2tetris.VMTranslator;
  * @Usage: Parser parser=new Parser(String command); int commandType=parser.getCommandType(); String arg1=parser.getArg1(); int arg2=parser.getArg2(); 
  */
 public class Parser {
+    public static final int C_END_LOOP=-1;
     public static final int C_ARITHMETIC=0;
-    public static final int C_PUSH=1;
-    public static final int C_POP=2;
+    public static final int C_PUSH_SEGMENT=1;
+    public static final int C_PUSH_CONSTANT=2;
+    public static final int C_POP=3;
 
     private String command=null;
 
@@ -24,12 +26,16 @@ public class Parser {
         this.command=command;
     }
 
-    public int commandType(){
+    public int getCommandType(){
         String operand=command.split(" ")[0];
         if("add".equals(operand) || "sub".equals(operand)){
             return C_ARITHMETIC;
         }else if("push".equals(operand)){
-            return C_PUSH;
+            if("constant".equals(getArg1())){
+                return C_PUSH_CONSTANT;
+            }else{
+                return C_PUSH_SEGMENT;
+            }
         }else if("pop".equals(operand)){
             return C_POP;
         }else{
