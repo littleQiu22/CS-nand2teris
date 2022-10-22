@@ -7,8 +7,6 @@ M=D
 @SP
 M=M+1
 //pop local 0
-@SP
-M=M-1
 @0
 D=A
 @LCL
@@ -16,6 +14,9 @@ D=D+M
 @R15
 M=D
 @SP
+M=M-1
+@SP
+A=M
 D=M
 @R15
 A=M
@@ -37,8 +38,6 @@ M=D
 @SP
 M=M+1
 //pop argument 2
-@SP
-M=M-1
 @2
 D=A
 @ARG
@@ -46,13 +45,14 @@ D=D+M
 @R15
 M=D
 @SP
+M=M-1
+@SP
+A=M
 D=M
 @R15
 A=M
 M=D
 //pop argument 1
-@SP
-M=M-1
 @1
 D=A
 @ARG
@@ -60,6 +60,9 @@ D=D+M
 @R15
 M=D
 @SP
+M=M-1
+@SP
+A=M
 D=M
 @R15
 A=M
@@ -73,8 +76,6 @@ M=D
 @SP
 M=M+1
 //pop this 6
-@SP
-M=M-1
 @6
 D=A
 @THIS
@@ -82,6 +83,9 @@ D=D+M
 @R15
 M=D
 @SP
+M=M-1
+@SP
+A=M
 D=M
 @R15
 A=M
@@ -103,8 +107,6 @@ M=D
 @SP
 M=M+1
 //pop that 5
-@SP
-M=M-1
 @5
 D=A
 @THAT
@@ -112,13 +114,14 @@ D=D+M
 @R15
 M=D
 @SP
+M=M-1
+@SP
+A=M
 D=M
 @R15
 A=M
 M=D
 //pop that 2
-@SP
-M=M-1
 @2
 D=A
 @THAT
@@ -126,6 +129,9 @@ D=D+M
 @R15
 M=D
 @SP
+M=M-1
+@SP
+A=M
 D=M
 @R15
 A=M
@@ -139,15 +145,15 @@ M=D
 @SP
 M=M+1
 //pop temp 6
-@SP
-M=M-1
-@6
+@5
 D=A
-@TEMP
-D=D+M
+@6
+D=D+A
 @R15
 M=D
 @SP
+M=M-1
+A=M
 D=M
 @R15
 A=M
@@ -156,7 +162,7 @@ M=D
 @0
 D=A
 @LCL
-A=D+A
+A=D+M
 D=M
 @SP
 A=M
@@ -167,26 +173,40 @@ M=M+1
 @5
 D=A
 @THAT
-A=D+A
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
-//pop constant R13
-@SP
-M=M-1
-A=M
-D=M
-@R13
-M=D
-//pop constant R14
-@SP
-M=M-1
-A=M
-D=M
+//pop R14 0
 @R14
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
+M=D
+//pop R13 0
+@R13
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
 M=D
 //add
 @R13
@@ -202,26 +222,40 @@ M=M+1
 @1
 D=A
 @ARG
-A=D+A
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
-//pop constant R13
-@SP
-M=M-1
-A=M
-D=M
-@R13
-M=D
-//pop constant R14
-@SP
-M=M-1
-A=M
-D=M
+//pop R14 0
 @R14
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
+M=D
+//pop R13 0
+@R13
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
 M=D
 //sub
 @R13
@@ -237,7 +271,7 @@ M=M+1
 @6
 D=A
 @THIS
-A=D+A
+A=D+M
 D=M
 @SP
 A=M
@@ -248,26 +282,40 @@ M=M+1
 @6
 D=A
 @THIS
-A=D+A
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
-//pop constant R13
-@SP
-M=M-1
-A=M
-D=M
-@R13
-M=D
-//pop constant R14
-@SP
-M=M-1
-A=M
-D=M
+//pop R14 0
 @R14
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
+M=D
+//pop R13 0
+@R13
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
 M=D
 //add
 @R13
@@ -279,19 +327,33 @@ A=M
 M=D
 @SP
 M=M+1
-//pop constant R13
-@SP
-M=M-1
-A=M
-D=M
-@R13
-M=D
-//pop constant R14
-@SP
-M=M-1
-A=M
-D=M
+//pop R14 0
 @R14
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
+M=D
+//pop R13 0
+@R13
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
 M=D
 //sub
 @R13
@@ -304,9 +366,9 @@ M=D
 @SP
 M=M+1
 //push temp 6
-@6
+@5
 D=A
-@TEMP
+@6
 A=D+A
 D=M
 @SP
@@ -314,19 +376,33 @@ A=M
 M=D
 @SP
 M=M+1
-//pop constant R13
-@SP
-M=M-1
-A=M
-D=M
-@R13
-M=D
-//pop constant R14
-@SP
-M=M-1
-A=M
-D=M
+//pop R14 0
 @R14
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
+M=D
+//pop R13 0
+@R13
+D=A
+@0
+D=D+A
+@R15
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R15
+A=M
 M=D
 //add
 @R13

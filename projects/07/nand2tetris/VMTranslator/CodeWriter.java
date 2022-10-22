@@ -18,20 +18,23 @@ public class CodeWriter {
     private static Map<String,String> symbolicMath2Math=new HashMap<>();
     static{
         // commandType to hack assembly language
-        commandType2Snippet.put(Parser.C_PUSH_SEGMENT, "//push <rawSegment> <index>\n@<index>\nD=A\n@<segment>\nA=D+A\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
+        commandType2Snippet.put(Parser.C_PUSH_SEGMENT_PTR, "//push <segmentName> <index>\n@<index>\nD=A\n@<segmentPtrOrAddr>\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
+        commandType2Snippet.put(Parser.C_PUSH_SEGMENT_ADDR, "//push <segmentName> <index>\n@<segmentPtrOrAddr>\nD=A\n@<index>\nA=D+A\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
         commandType2Snippet.put(Parser.C_PUSH_CONSTANT, "//push constant <index>\n@<index>\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1");
-        commandType2Snippet.put(Parser.C_POP_SEGMENT, "//pop <rawSegment> <index>\n@SP\nM=M-1\n@<index>\nD=A\n@<segment>\nD=D+M\n@R15\nM=D\n@SP\nD=M\n@R15\nA=M\nM=D");
-        commandType2Snippet.put(Parser.C_POP_CONSTANT, "//pop constant <index>\n@SP\nM=M-1\nA=M\nD=M\n@<index>\nM=D");
+        commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR, "//pop <segmentName> <index>\n@<index>\nD=A\n@<segmentPtrOrAddr>\nD=D+M\n@R15\nM=D\n@SP\nM=M-1\n@SP\nA=M\nD=M\n@R15\nA=M\nM=D");
+        commandType2Snippet.put(Parser.C_POP_SEGMENT_ADDR, "//pop <segmentName> <index>\n@<segmentPtrOrAddr>\nD=A\n@<index>\nD=D+A\n@R15\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@R15\nA=M\nM=D");
         commandType2Snippet.put(Parser.C_ARITHMETIC, "//<operand>\n@R13\nD=M\n@R14\nD=D<mathOperand>M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
         commandType2Snippet.put(Parser.C_END_LOOP,"//end loop\n(AUTO_END)\n@AUTO_END\n0;JMP");
 
         // vm memory to hack assembly memory
+        // pointer map
         VMMemory2HackMemory.put("local", "LCL");
         VMMemory2HackMemory.put("argument", "ARG");
         VMMemory2HackMemory.put("this", "THIS");
         VMMemory2HackMemory.put("that", "THAT");
-        VMMemory2HackMemory.put("temp", "TEMP");
-        VMMemory2HackMemory.put("static", "Foo");
+        // initial address map
+        VMMemory2HackMemory.put("temp", "5");
+        VMMemory2HackMemory.put("static", "16");
         VMMemory2HackMemory.put("pointer", "3");
 
         // symbolic math operand to mathematic operand
@@ -42,7 +45,8 @@ public class CodeWriter {
     public static String translate(String command){
         parser.setCommand(command);
         int commandType=parser.getCommandType();
-        if(Parser.C_PUSH_SEGMENT==commandType || Parser.C_PUSH_CONSTANT==commandType || Parser.C_POP_SEGMENT==commandType || Parser.C_POP_CONSTANT==commandType){
+        boolean pushOrPop=Parser.C_PUSH_CONSTANT==commandType || Parser.C_PUSH_SEGMENT_ADDR==commandType || Parser.C_PUSH_SEGMENT_PTR==commandType || Parser.C_POP_SEGMENT_ADDR==commandType || Parser.C_POP_SEGMENT_PTR==commandType;
+        if(pushOrPop){
             return translatePushOrPop(command);
         }else if(Parser.C_ARITHMETIC==commandType){
             return translateArithmetic(command);
@@ -61,8 +65,8 @@ public class CodeWriter {
         }
         String index=parser.getArg2();
         String assemblerCommands=commandType2Snippet.get(commandType);
-        assemblerCommands=assemblerCommands.replace("<rawSegment>", segment);
-        assemblerCommands=assemblerCommands.replace("<segment>", segmentMapped);
+        assemblerCommands=assemblerCommands.replace("<segmentName>", segment);
+        assemblerCommands=assemblerCommands.replace("<segmentPtrOrAddr>", segmentMapped);
         assemblerCommands=assemblerCommands.replace("<index>", index);
         return assemblerCommands;
     }
@@ -72,8 +76,8 @@ public class CodeWriter {
         parser.setCommand(command);
         int commandType=parser.getCommandType();
         String symbolicOperand=parser.getArg1();
-        String popVMCommand1="pop constant R13";
-        String popVMCommand2="pop constant R14";
+        String popVMCommand1="pop R14 0";
+        String popVMCommand2="pop R13 0";
         String assemblerCommand1=translatePushOrPop(popVMCommand1);
         String assemblerCommand2=translatePushOrPop(popVMCommand2);
         String assemblerCommand3=commandType2Snippet.get(commandType);
