@@ -7,12 +7,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+
+
 public class Main {
     private String sourceFilePath;
     private String destFilePath;
     private PrintWriter printWriter;
     private BufferedReader bufferedReader;
-
+    private IntWrapper intWrapper=new IntWrapper();
+    
     public Main(){}
 
     public Main(String sourceFilePath){
@@ -42,7 +45,7 @@ public class Main {
                 if(vmCommand.length()==0){
                     continue;
                 }
-                String asmCommand=CodeWriter.translate(vmCommand);
+                String asmCommand=CodeWriter.translate(vmCommand,intWrapper);
                 printWriter.println(asmCommand);
             }
             // add an auto-generated infinite loop for any VM file 

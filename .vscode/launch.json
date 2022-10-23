@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "nand2tetris.VMTranslator.Main",
             "projectName": "nand2tetris_ea5e649",
-            "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/07/StackArithmetic/SimpleAdd/SimpleAdd.vm"
+            "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/07/StackArithmetic/StackTest/StackTest.vm"
         },
         {
             "type": "java",
