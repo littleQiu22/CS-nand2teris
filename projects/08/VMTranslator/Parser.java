@@ -42,6 +42,10 @@ public class Parser {
     // label
     public static final int C_LABEL=15;
 
+    // additional patch
+    public static final int C_PUSH_SEGMENT_ADDR_WITHOUT_IDX=16;
+    public static final int C_POP_SEGMENT_ADDR_WITHOUT_IDX=17;
+
     private String command;
 
     private boolean useExInfo;
@@ -83,6 +87,7 @@ public class Parser {
         if(useExInfo){
             isSegmentPtr=exPtrNotAddr;
         }
+        boolean isSegmentAddrWithoutIdx=getArg2()==null;
         boolean isConstant="constant".equals(arg1);
         boolean isArithmeticAddOrSub="add".equals(operand) || "sub".equals(operand);
         boolean isArithmeticNeg="neg".equals(operand);
@@ -100,12 +105,16 @@ public class Parser {
                 return C_PUSH_SEGMENT_PTR;
             }else if(isConstant){
                 return C_PUSH_CONSTANT;
+            }else if(isSegmentAddrWithoutIdx){
+                return C_PUSH_SEGMENT_ADDR_WITHOUT_IDX;
             }else{
                 return C_PUSH_SEGMENT_ADDR;
             }
         }else if(isPop){
             if(isSegmentPtr){
                 return C_POP_SEGMENT_PTR;
+            }else if(isSegmentAddrWithoutIdx){
+                return C_POP_SEGMENT_ADDR_WITHOUT_IDX;
             }else{
                 return C_POP_SEGMENT_ADDR;
             }
