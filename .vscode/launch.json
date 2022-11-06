@@ -6,6 +6,18 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Main",
+            "request": "launch",
+            "mainClass": "nand2tetris.VMTranslator.Main"
+        },
+        {
+            "type": "java",
+            "name": "Launch Test",
+            "request": "launch",
+            "mainClass": "Test"
+        },
+        {
+            "type": "java",
             "name": "Launch VMTranslator",
             "request": "launch",
             "mainClass": "nand2tetris.VMTranslator.Main",

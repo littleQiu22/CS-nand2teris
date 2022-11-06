@@ -19,24 +19,23 @@ public class CodeWriter {
     private static Map<String,String> symbolicComp2JumpCond=new HashMap<>();
     static{
         // commandType to hack assembly language
-
+        // push
         commandType2Snippet.put(Parser.C_PUSH_SEGMENT_PTR, "//push <segmentName> <index>\n@<index>\nD=A\n@<segmentPtrOrAddr>\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
         commandType2Snippet.put(Parser.C_PUSH_SEGMENT_ADDR, "//push <segmentName> <index>\n@<segmentPtrOrAddr>\nD=A\n@<index>\nA=D+A\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
         commandType2Snippet.put(Parser.C_PUSH_CONSTANT, "//push constant <index>\n@<index>\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1");
-
+        // pop
         commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR, "//pop <segmentName> <index>\n@<index>\nD=A\n@<segmentPtrOrAddr>\nD=D+M\n@R15\nM=D\n@SP\nM=M-1\n@SP\nA=M\nD=M\n@R15\nA=M\nM=D");
         commandType2Snippet.put(Parser.C_POP_SEGMENT_ADDR, "//pop <segmentName> <index>\n@<segmentPtrOrAddr>\nD=A\n@<index>\nD=D+A\n@R15\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@R15\nA=M\nM=D");
-
-        // commandType2Snippet.put(Parser.C_ARITHMETIC_ADD_OR_SUB, "//<operand>\n@R13\nD=M\n@R14\nD=D<mathOperand>M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
+        // arithmetic
         commandType2Snippet.put(Parser.C_ARITHMETIC_ADD_OR_SUB, "//<operand>\n@SP\nM=M-1\nA=M-1\nD=M\nA=A+1\nD=D<mathOperand>M\nA=A-1\nM=D");
         commandType2Snippet.put(Parser.C_ARITHMETIC_NEG, "//neg\n@SP\nA=M-1\nM=!M\nM=M+1");
-
+        // logical
         commandType2Snippet.put(Parser.C_LOGICAL_AND_OR_OR,"//<operand>\n@SP\nM=M-1\nA=M\nD=M\nA=A-1\nM=D<mathOperand>M");
         commandType2Snippet.put(Parser.C_LOGICAL_NOT,"//not\n@SP\nA=M-1\nM=!M");
-
+        // comparison
         commandType2Snippet.put(Parser.C_COMPARISON,"//<comparison>\n@SP\nM=M-1\nA=M\nD=M\nA=A-1\nD=D-M\nM=0\n@AUTO_TRUE_LABEL_<idx>\nD;<jumpCond>\n@AUTO_END_LABEL_<idx>\n0;JMP\n(AUTO_TRUE_LABEL_<idx>)\n@SP\nA=M-1\nM=!M\n(AUTO_END_LABEL_<idx>)");
-
-        commandType2Snippet.put(Parser.C_END_LOOP,"//end loop\n(AUTO_INFINITE_LOOP)\n@AUTO_INFINITE_LOOP\n0;JMP");
+        // endloop
+        commandType2Snippet.put(Parser.C_END_LOOP, "//auto end loop\n(AUTO_END_LOOP)\n@AUTO_END_LOOP\n0;JMP");
 
         // vm memory to hack assembly memory
         // pointer map
