@@ -45,6 +45,7 @@ public class Parser {
     // additional patch
     public static final int C_PUSH_SEGMENT_ADDR_WITHOUT_IDX=16;
     public static final int C_POP_SEGMENT_ADDR_WITHOUT_IDX=17;
+    public static final int C_POP_SEGMENT_PTR_WITHOUT_IDX=18;
 
     private String command;
 
@@ -87,7 +88,7 @@ public class Parser {
         if(useExInfo){
             isSegmentPtr=exPtrNotAddr;
         }
-        boolean isSegmentAddrWithoutIdx=getArg2()==null;
+        boolean isSegmentWithoutIdx=getArg2()==null;
         boolean isConstant="constant".equals(arg1);
         boolean isArithmeticAddOrSub="add".equals(operand) || "sub".equals(operand);
         boolean isArithmeticNeg="neg".equals(operand);
@@ -105,15 +106,18 @@ public class Parser {
                 return C_PUSH_SEGMENT_PTR;
             }else if(isConstant){
                 return C_PUSH_CONSTANT;
-            }else if(isSegmentAddrWithoutIdx){
+            }else if(isSegmentWithoutIdx){
                 return C_PUSH_SEGMENT_ADDR_WITHOUT_IDX;
             }else{
                 return C_PUSH_SEGMENT_ADDR;
             }
         }else if(isPop){
             if(isSegmentPtr){
+                if(isSegmentWithoutIdx){
+                    return C_POP_SEGMENT_ADDR_WITHOUT_IDX;
+                }
                 return C_POP_SEGMENT_PTR;
-            }else if(isSegmentAddrWithoutIdx){
+            }else if(isSegmentWithoutIdx){
                 return C_POP_SEGMENT_ADDR_WITHOUT_IDX;
             }else{
                 return C_POP_SEGMENT_ADDR;

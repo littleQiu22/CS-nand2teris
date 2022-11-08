@@ -111,6 +111,18 @@ public class CodeWriter {
          * M=D
          */
 
+         commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR_WITHOUT_IDX, "");
+        /*
+         * // pop <segmentName> [<segmentName> is used for a pointer, not for address symbolic]
+         * @SP
+         * M=M-1
+         * A=M
+         * D=M
+         * @<segmentPtrOrAddr>
+         * A=M
+         * M=D
+         */
+
         commandType2Snippet.put(Parser.C_POP_SEGMENT_ADDR_WITHOUT_IDX, "//pop <segmentName>\n@SP\nM=M-1\nA=M\nD=M\n@<segmentPtrOrAddr>\nM=D");
         /*
          * // pop <segmentName> [<segmentName> is used for address symbolic, not for a pointer]
@@ -197,15 +209,23 @@ public class CodeWriter {
 
         // define function
         // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\n@R13\nM=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\n@R13\nM=M-1\nD=M\n@<fileName>.<functionName>.initLoop\nD;JGT");
-        commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\nD=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoop\nD;JGT");
+        // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\nD=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoop\nD;JGT");
+        commandType2Snippet.put(Parser.C_DEFINE_FUNCTION, "// function <functionName> <nVars>\n@<nVars>\nD=A\n(<fileName>.<functionName>.initLoopIn)\n@<fileName>.<functionName>.pushLocal\nD;JGT\n@<fileName>.<functionName>.initLoopOut\n0;JMP\n(<fileName>.<functionName>.pushLocal)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoopIn\n0;JMP\n(<fileName>.<functionName>.initLoopOut)");
         /*
          * (<fileName>.<functionName>)
-         * D=<nVars>
-         * (<fileName>.<functionName>.initLoop)
+         * @<nVars>
+         * D=A
+         * (<fileName>.<functionName>.initLoopIn)
+         * @<fileName>.<functionName>.pushLocal
+         * D;JGT
+         * @<fileName>.<functionName>.initLoopOut
+         * 0;JMP
+         * (<fileName>.<functionName>.pushLocal)
          * <<push constant 0>> [need be translated into asm]
          * D=D-1
-         * @<fileName>.<functionName>.initLoop
-         * D;JGT
+         * @<fileName>.<functionName>.initLoopIn
+         * 0;JMP
+         * (<fileName>.<functionName>.initLoopOut)
          */
         
         /*
@@ -272,7 +292,54 @@ public class CodeWriter {
          */
 
         // return
-        commandType2Snippet.put(Parser.C_RETURN, "// return\n<<pop argument 0>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\nA=D\n0;JMP");
+        // commandType2Snippet.put(Parser.C_RETURN, "// return\n<<pop argument 0>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\nA=D\n0;JMP");
+        commandType2Snippet.put(Parser.C_RETURN,"return\n<<pop ARG>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nA=M-1\nA=M\n0;JMP");
+        /*
+         * <<pop ARG>> [POP_SEGMENT_PTR]
+         * 
+         * @ARG
+         * D=M+1
+         * @SP
+         * M=D
+         * 
+         * @LCL
+         * D=M
+         * 
+         * @R13
+         * M=D-1
+         * A=M
+         * D=M
+         * @THAT
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @THIS
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @ARG
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @LCL
+         * M=D
+         * 
+         * @R13
+         * A=M-1
+         * A=M
+         * 0;JMP
+         * 
+         */
+        
         /*
          * <<pop argument 0>> [POP_SEGMENT_PTR]
          * 
@@ -322,14 +389,24 @@ public class CodeWriter {
          */
 
         // goto label
-        commandType2Snippet.put(Parser.C_GOTO,"// goto <label>\n@<fileName>.<functionName>$<label>\n0;JMP");
+        commandType2Snippet.put(Parser.C_GOTO,"// goto <labelName>\n@<fileName>.<functionName>$<labelName>\n0;JMP");
         /*
          * @<fileName>.<functionName>$<label>
          * 0;JMP
          */
 
         // if-goto label
-        commandType2Snippet.put(Parser.C_IF_GOTO,"// if-goto <label>\n<<pop R13 0>>\n@R13\nD=M\n@<fileName>.<functionName>$<label>\nD;JNE");
+        // commandType2Snippet.put(Parser.C_IF_GOTO,"// if-goto <label>\n<<pop R13 0>>\n@R13\nD=M\n@<fileName>.<functionName>$<label>\nD;JNE");
+        commandType2Snippet.put(Parser.C_IF_GOTO,"// if-goto <labelName>\n@SP\nM=M-1\nA=M\nD=M\n@<fileName>.<functionName>$<labelName>\nD;JNE");
+        /*
+         * @SP
+         * M=M-1
+         * A=M
+         * D=M
+         * @<fileName>.<functionName>$<label>
+         * D;JNE 
+         */
+
         /*
          * <<pop R13 0>> [POP_SEGMENT_ADDR]
          * @R13
@@ -379,7 +456,7 @@ public class CodeWriter {
     public String translate(String command){
         parser.setCommand(command);
         int commandType=parser.getCommandType();
-        boolean pushOrPop=Parser.C_PUSH_CONSTANT==commandType || Parser.C_PUSH_SEGMENT_ADDR==commandType || Parser.C_PUSH_SEGMENT_PTR==commandType || Parser.C_PUSH_SEGMENT_ADDR_WITHOUT_IDX==commandType || Parser.C_POP_SEGMENT_ADDR==commandType || Parser.C_POP_SEGMENT_PTR==commandType || Parser.C_POP_SEGMENT_ADDR_WITHOUT_IDX==commandType;
+        boolean pushOrPop=Parser.C_PUSH_CONSTANT==commandType || Parser.C_PUSH_SEGMENT_ADDR==commandType || Parser.C_PUSH_SEGMENT_PTR==commandType || Parser.C_PUSH_SEGMENT_ADDR_WITHOUT_IDX==commandType || Parser.C_POP_SEGMENT_ADDR==commandType || Parser.C_POP_SEGMENT_PTR==commandType || Parser.C_POP_SEGMENT_PTR_WITHOUT_IDX==commandType || Parser.C_POP_SEGMENT_ADDR_WITHOUT_IDX==commandType;
         boolean arithmeticOrLogical=Parser.C_ARITHMETIC_ADD_OR_SUB==commandType || Parser.C_ARITHMETIC_NEG==commandType || Parser.C_LOGICAL_AND_OR_OR==commandType || Parser.C_LOGICAL_NOT==commandType;
         boolean comparison=Parser.C_COMPARISON==commandType;
         boolean callFunc=Parser.C_CALL_FUNCTION==commandType;
@@ -413,7 +490,7 @@ public class CodeWriter {
         while(matcher.find()){
             int stIdx=matcher.start();
             int edIdx=matcher.end();
-            String vmCommand=mixedCommand.substring(stIdx, edIdx);
+            String vmCommand=mixedCommand.substring(stIdx+2, edIdx-2);
             if(stIdx>prevIdx){
                 assemblerCommands+=mixedCommand.substring(prevIdx, stIdx-1);
             }
@@ -435,9 +512,7 @@ public class CodeWriter {
         assemblerCommands=assemblerCommands.replace("<labelName>", labelName);
         assemblerCommands=assemblerCommands.replace("<fileName>", curFileName);
         assemblerCommands=assemblerCommands.replace("<functionName>", curFunctionName);
-        parser.setUseExInfo(true);
-        parser.setExPtrNotAddr(false);
-        return vmSecondTranslate(assemblerCommands);
+        return assemblerCommands;
     }
 
 
@@ -447,6 +522,8 @@ public class CodeWriter {
         String assemblerCommands=commandType2Snippet.get(commandType);
         curFunctionName=null;
         curIntWrapperForFunc.setValue(0);
+        parser.setUseExInfo(true);
+        parser.setExPtrNotAddr(true);
         return vmSecondTranslate(assemblerCommands);
     }
 
