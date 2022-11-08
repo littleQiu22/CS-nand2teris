@@ -1,4 +1,4 @@
-package nand2tetris.VMTranslator;
+package nand2tetris.VMTranslatorPlus;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.LinkedList;
 
 
 
@@ -29,7 +28,7 @@ public class Main {
         this.destFolder=destFolder;
     }
 
-    public boolean sourceDestCheck(){
+    public boolean sourceDestCheck() throws IOException{
         // source
         File file=new File(sourceName);
         if(!file.exists()){
@@ -76,11 +75,11 @@ public class Main {
             }
             printWriter=new PrintWriter(destFile);
             for(File f:sourceFileList){
-                if(f.isDirectory()){
+                if(f.isDirectory() || !(f.getName().endsWith(".vm"))){
                     continue;
                 }
                 bufferedReader=new BufferedReader(new FileReader(f));
-                CodeWriter codeWriter=new CodeWriter(f.getName());
+                CodeWriter codeWriter=new CodeWriter(f.getName().replace(".vm", ""));
                 String vmCommand=null;
                 // read each VM command and translate it into ASM commands
                 while((vmCommand=bufferedReader.readLine())!=null){

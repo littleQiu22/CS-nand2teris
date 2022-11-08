@@ -1,4 +1,4 @@
-package nand2tetris.VMTranslator;
+package nand2tetris.VMTranslatorPlus;
 
 /*
  * @Author: 邱俊彦 (Junyan Qiu)
@@ -114,7 +114,7 @@ public class Parser {
         }else if(isPop){
             if(isSegmentPtr){
                 if(isSegmentWithoutIdx){
-                    return C_POP_SEGMENT_ADDR_WITHOUT_IDX;
+                    return C_POP_SEGMENT_PTR_WITHOUT_IDX;
                 }
                 return C_POP_SEGMENT_PTR;
             }else if(isSegmentWithoutIdx){

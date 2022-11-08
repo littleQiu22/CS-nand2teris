@@ -1,9 +1,7 @@
-package nand2tetris.VMTranslator;
+package nand2tetris.VMTranslatorPlus;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,7 +51,8 @@ public class CodeWriter {
          * M=D
          */
 
-         commandType2Snippet.put(Parser.C_PUSH_SEGMENT_ADDR_WITHOUT_IDX, "// push <segmentName>\n@<segmentPtrOrAddr>\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
+        //  commandType2Snippet.put(Parser.C_PUSH_SEGMENT_ADDR_WITHOUT_IDX, "// push <segmentName>\n@<segmentPtrOrAddr>\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1");
+        commandType2Snippet.put(Parser.C_PUSH_SEGMENT_ADDR_WITHOUT_IDX,"// push <segmentName>\n@<segmentPtrOrAddr>\nD=M\n@SP\nM=M+1\nA=M-1\nM=D");
         /*
          * // push <segmentName> [<segmentName> is used for address symbolic, not for a pointer]
          * @<segmentPtrOrAddr>
@@ -111,7 +110,7 @@ public class CodeWriter {
          * M=D
          */
 
-         commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR_WITHOUT_IDX, "");
+         commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR_WITHOUT_IDX, "//pop <segmentName>\n@SP\nM=M-1\nA=M\nD=M\n@<segmentPtrOrAddr>\nA=M\nM=D");
         /*
          * // pop <segmentName> [<segmentName> is used for a pointer, not for address symbolic]
          * @SP
@@ -210,7 +209,7 @@ public class CodeWriter {
         // define function
         // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\n@R13\nM=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\n@R13\nM=M-1\nD=M\n@<fileName>.<functionName>.initLoop\nD;JGT");
         // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\nD=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoop\nD;JGT");
-        commandType2Snippet.put(Parser.C_DEFINE_FUNCTION, "// function <functionName> <nVars>\n@<nVars>\nD=A\n(<fileName>.<functionName>.initLoopIn)\n@<fileName>.<functionName>.pushLocal\nD;JGT\n@<fileName>.<functionName>.initLoopOut\n0;JMP\n(<fileName>.<functionName>.pushLocal)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoopIn\n0;JMP\n(<fileName>.<functionName>.initLoopOut)");
+        commandType2Snippet.put(Parser.C_DEFINE_FUNCTION, "// function <fileName>.<functionName> <nVars>\n(<fileName>.<functionName>)\n@<nVars>\nD=A\n(<fileName>.<functionName>.initLoopIn)\n@<fileName>.<functionName>.pushLocal\nD;JGT\n@<fileName>.<functionName>.initLoopOut\n0;JMP\n(<fileName>.<functionName>.pushLocal)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoopIn\n0;JMP\n(<fileName>.<functionName>.initLoopOut)");
         /*
          * (<fileName>.<functionName>)
          * @<nVars>
@@ -243,7 +242,7 @@ public class CodeWriter {
 
         // call function
         // commandType2Snippet.put(Parser.C_CALL_FUNCTION,"// call <functionName> <nArgs>\\@<fileName>.<functionName>$ret<i>\nD=A\n@R13\nM=D\n<<push R13 0>>\n<<push LCL 0>>\n<<push ARG 0>>\n<<push THIS 0>>\n<<push THAT 0>>\n<<push SP 0>>\n<<push constant <num>>>\n<<sub>>\n<<pop ARG 0>>\n@SP\nD=M\n@LCL\nM=D\n@<calleeFileName>.<calleeFunctionName>\n0;JMP;(<fileName>.<functionName>$ret<i>)");
-        commandType2Snippet.put(Parser.C_CALL_FUNCTION, "// call <functionName> <nArgs>\\@<fileName>.<functionName>$ret<i>\nD=A\n@SP\nM=M+1\nA=M-1\nM=D\n<<push LCL>>\n<<push ARG>>\n<<push THIS>>\n<<push THAT>>\n<<push SP>>\n<<push constant <num>>>\n<<sub>>\n<<pop ARG>>\n@SP\nD=M\n@LCL\nM=D\n@<calleeFileName>.<calleeFunctionName>\n0;JMP;(<fileName>.<functionName>$ret<i>)");
+        commandType2Snippet.put(Parser.C_CALL_FUNCTION, "// call <fileName>.<functionName> <nArgs>\n@<fileName>.<functionName>$ret<i>\nD=A\n@SP\nM=M+1\nA=M-1\nM=D\n<<push LCL>>\n<<push ARG>>\n<<push THIS>>\n<<push THAT>>\n<<push SP>>\n<<push constant <num>>>\n<<sub>>\n<<pop ARG>>\n@SP\nD=M\n@LCL\nM=D\n@<calleeFileName>.<calleeFunctionName>\n0;JMP\n(<fileName>.<functionName>$ret<i>)");
         /*
          * @<fileName>.<functionName>$ret<i>
          * D=A
@@ -293,7 +292,7 @@ public class CodeWriter {
 
         // return
         // commandType2Snippet.put(Parser.C_RETURN, "// return\n<<pop argument 0>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\nA=D\n0;JMP");
-        commandType2Snippet.put(Parser.C_RETURN,"return\n<<pop ARG>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nA=M-1\nA=M\n0;JMP");
+        commandType2Snippet.put(Parser.C_RETURN,"// return\n<<pop ARG>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nA=M-1\nA=M\n0;JMP");
         /*
          * <<pop ARG>> [POP_SEGMENT_PTR]
          * 
@@ -492,10 +491,13 @@ public class CodeWriter {
             int edIdx=matcher.end();
             String vmCommand=mixedCommand.substring(stIdx+2, edIdx-2);
             if(stIdx>prevIdx){
-                assemblerCommands+=mixedCommand.substring(prevIdx, stIdx-1);
+                assemblerCommands+=mixedCommand.substring(prevIdx, stIdx);
             }
             assemblerCommands+=translate(vmCommand);
             prevIdx=edIdx;
+        }
+        if(prevIdx<mixedCommand.length()){
+            assemblerCommands+=mixedCommand.substring(prevIdx, mixedCommand.length());
         }
         parser.setUseExInfo(false);
         return assemblerCommands;
@@ -520,7 +522,7 @@ public class CodeWriter {
         parser.setCommand(command);
         int commandType=parser.getCommandType();
         String assemblerCommands=commandType2Snippet.get(commandType);
-        curFunctionName=null;
+        // curFunctionName=null;
         curIntWrapperForFunc.setValue(0);
         parser.setUseExInfo(true);
         parser.setExPtrNotAddr(true);
@@ -548,10 +550,11 @@ public class CodeWriter {
         }
         assemblerCommands=assemblerCommands.replace("<fileName>", curFileName);
         assemblerCommands=assemblerCommands.replace("<functionName>", curFunctionName);
-        assemblerCommands=assemblerCommands.replace("<num>", reducedNum);
-        assemblerCommands=assemblerCommands.replace("<calleeFileName>", calleeFunctionName);
+        assemblerCommands=assemblerCommands.replace("<num>", ""+reducedNum);
+        assemblerCommands=assemblerCommands.replace("<calleeFileName>", calleeFileName);
         assemblerCommands=assemblerCommands.replace("<calleeFunctionName>", calleeFunctionName);
         assemblerCommands=assemblerCommands.replace("<i>", ""+callerReturnAddrIdx);
+        assemblerCommands=assemblerCommands.replace("<nArgs>", parser.getArg2());
         parser.setUseExInfo(true);
         parser.setExPtrNotAddr(false);
         return vmSecondTranslate(assemblerCommands);
@@ -588,7 +591,9 @@ public class CodeWriter {
         String assemblerCommands=commandType2Snippet.get(commandType);
         assemblerCommands=assemblerCommands.replace("<segmentName>", segment);
         assemblerCommands=assemblerCommands.replace("<segmentPtrOrAddr>", segmentMapped);
-        assemblerCommands=assemblerCommands.replace("<index>", index);
+        if(index!=null){
+            assemblerCommands=assemblerCommands.replace("<index>", index);
+        }
         return assemblerCommands;
     }
 
@@ -610,7 +615,7 @@ public class CodeWriter {
         String comparison=parser.getArg1();
         String assemblerCommand=commandType2Snippet.get(commandType);
         assemblerCommand=assemblerCommand.replace("<comparison>", comparison);
-        assemblerCommand=assemblerCommand.replace("<idx>", ""+intWrapper.getValue());
+        assemblerCommand=assemblerCommand.replace("<idx>", ""+intWrapperForComp.getValue());
         assemblerCommand=assemblerCommand.replace("<jumpCond>", symbolicComp2JumpCond.getOrDefault(comparison,comparison));
         intWrapperForComp.incValue();
         return assemblerCommand;

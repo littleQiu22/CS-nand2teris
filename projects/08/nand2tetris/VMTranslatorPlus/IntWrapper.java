@@ -1,4 +1,4 @@
-package nand2tetris.VMTranslator;
+package nand2tetris.VMTranslatorPlus;
 
 public class IntWrapper {
     private int value;

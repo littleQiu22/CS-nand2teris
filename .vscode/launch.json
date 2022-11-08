@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Test",
+            "request": "launch",
+            "mainClass": "nand2tetris.VMTranslatorPlus.Test",
+            "projectName": "nand2tetris_ea5e649"
+        },
+        {
+            "type": "java",
             "name": "Launch Main",
             "request": "launch",
             "mainClass": "nand2tetris.VMTranslator.Main"
@@ -15,14 +22,6 @@
             "name": "Launch Test",
             "request": "launch",
             "mainClass": "Test"
-        },
-        {
-            "type": "java",
-            "name": "Launch VMTranslator",
-            "request": "launch",
-            "mainClass": "nand2tetris.VMTranslator.Main",
-            "projectName": "nand2tetris_ea5e649",
-            "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/07/StackArithmetic/StackTest/StackTest.vm"
         },
         {
             "type": "java",
@@ -37,6 +36,21 @@
             "mainClass": "nand2tetris.HackAssembler.Main",
             "projectName": "nand2tetris_ea5e649",
             "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/06/pong/Pong.asm"
+        },
+        {
+            "type": "java",
+            "name": "Launch VMTranslator",
+            "request": "launch",
+            "mainClass": "nand2tetris.VMTranslator.Main",
+            "projectName": "nand2tetris_ea5e649",
+            "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/07/StackArithmetic/StackTest/StackTest.vm"
+        },
+        {
+            "type": "java",
+            "name": "Launch VMTranslatorPlus",
+            "request": "launch",
+            "mainClass": "nand2tetris.VMTranslatorPlus.Main",
+            "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/08/FunctionCalls/FibonacciElement"
         }
     ]
 }
