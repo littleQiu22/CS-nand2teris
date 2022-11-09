@@ -11,19 +11,31 @@ import java.util.regex.Pattern;
  * @Lastest modified date: 2022-10-20
  * @Description: CodeWriter is a class which map a single VM command into Hack Assembler commands.  
  * @Usage: String assembler=CodeWriter.translate(String command);
- * @Implementation details: 1. R13 and R14 are used for storage for arithmetic command.  R15 is used for temporary storage.  
  */
 public class CodeWriter {
     private static final String defaultFunctionName="AUTO_ENTRY_FUNC";
-    private static Map<Integer,String> commandType2Snippet=new HashMap<>();
+    public static Map<Integer,String> commandType2Snippet=new HashMap<>();
     private static Map<String,String> VMMemory2HackMemory=new HashMap<>();
     private static Map<String,String> symbolicMath2Math=new HashMap<>();
     private static Map<String,String> symbolicComp2JumpCond=new HashMap<>();
 
     static{
         // commandType to hack assembly language
+        // bootstrap
+        commandType2Snippet.put(Parser.C_BOOTSTRAP,"// bootstrap\n@256\nD=A\n@SP\nM=D\n@Sys.init\n0;JMP");
+        /* 
+         * // set stack pointer
+         * // SP
+         * @256
+         * D=A
+         * @SP
+         * M=D
+         * @Sys.init
+         * 0;JMP 
+         */
+
         // push
-        commandType2Snippet.put(Parser.C_PUSH_SEGMENT_PTR, "//push <segmentName> <index>\n@<index>\nD=A\n@<segmentPtrOrAddr>\nA=D+M\nD=M\n@SP\nM=M+1\nA=M-1\nM=D");
+        commandType2Snippet.put(Parser.C_PUSH_SEGMENT_PTR, "// push <segmentName> <index>\n@<index>\nD=A\n@<segmentPtrOrAddr>\nA=D+M\nD=M\n@SP\nM=M+1\nA=M-1\nM=D");
         /*
          * // push <segmentName> <index> [<segmentName> is used for pointer, not just a address symbolic]
          * @<index>
@@ -37,7 +49,7 @@ public class CodeWriter {
          * M=D
          */
 
-        commandType2Snippet.put(Parser.C_PUSH_SEGMENT_ADDR, "//push <segmentName> <index>\n@<segmentPtrOrAddr>\nD=A\n@<index>\nA=D+A\nD=M\n@SP\nM=M+1\nA=M-1\nM=D");
+        commandType2Snippet.put(Parser.C_PUSH_SEGMENT_ADDR, "// push <segmentName> <index>\n@<segmentPtrOrAddr>\nD=A\n@<index>\nA=D+A\nD=M\n@SP\nM=M+1\nA=M-1\nM=D");
         /*
          * // push <segmentName> <index> [<segmentName> is used for address symbolic, not for a pointer]
          * @<index>
@@ -63,7 +75,7 @@ public class CodeWriter {
          * M=D
          */
 
-        commandType2Snippet.put(Parser.C_PUSH_CONSTANT, "//push constant <index>\n@<index>\nD=A\n@SP\nM=M+1\nA=M-1\nM=D");
+        commandType2Snippet.put(Parser.C_PUSH_CONSTANT, "// push constant <index>\n@<index>\nD=A\n@SP\nM=M+1\nA=M-1\nM=D");
         /*
          * // push constant <index>
          * @<index>
@@ -75,7 +87,7 @@ public class CodeWriter {
          */
 
         // pop
-        commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR, "//pop <segmentName> <index>\n@<index>\nD=A\n@<segmentPtrOrAddr>\nD=D+M\n@R15\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@R15\nA=M\nM=D");
+        commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR, "// pop <segmentName> <index>\n@<index>\nD=A\n@<segmentPtrOrAddr>\nD=D+M\n@R15\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@R15\nA=M\nM=D");
         /* // pop <segmentName> <index> [<segmentName> is used for pointer, not just a address symbolic]
          * @<index>
          * D=A
@@ -92,7 +104,7 @@ public class CodeWriter {
          * M=D
          */
 
-        commandType2Snippet.put(Parser.C_POP_SEGMENT_ADDR, "//pop <segmentName> <index>\n@<segmentPtrOrAddr>\nD=A\n@<index>\nD=D+A\n@R15\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@R15\nA=M\nM=D");
+        commandType2Snippet.put(Parser.C_POP_SEGMENT_ADDR, "// pop <segmentName> <index>\n@<segmentPtrOrAddr>\nD=A\n@<index>\nD=D+A\n@R15\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@R15\nA=M\nM=D");
         /*
          * // pop <segmentName> <index> [<segmentName> is used for address symbolic, not for a pointer]
          * @<index>
@@ -110,7 +122,7 @@ public class CodeWriter {
          * M=D
          */
 
-         commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR_WITHOUT_IDX, "//pop <segmentName>\n@SP\nM=M-1\nA=M\nD=M\n@<segmentPtrOrAddr>\nA=M\nM=D");
+         commandType2Snippet.put(Parser.C_POP_SEGMENT_PTR_WITHOUT_IDX, "// pop <segmentName>\n@SP\nM=M-1\nA=M\nD=M\n@<segmentPtrOrAddr>\nA=M\nM=D");
         /*
          * // pop <segmentName> [<segmentName> is used for a pointer, not for address symbolic]
          * @SP
@@ -122,7 +134,7 @@ public class CodeWriter {
          * M=D
          */
 
-        commandType2Snippet.put(Parser.C_POP_SEGMENT_ADDR_WITHOUT_IDX, "//pop <segmentName>\n@SP\nM=M-1\nA=M\nD=M\n@<segmentPtrOrAddr>\nM=D");
+        commandType2Snippet.put(Parser.C_POP_SEGMENT_ADDR_WITHOUT_IDX, "// pop <segmentName>\n@SP\nM=M-1\nA=M\nD=M\n@<segmentPtrOrAddr>\nM=D");
         /*
          * // pop <segmentName> [<segmentName> is used for address symbolic, not for a pointer]
          * @SP
@@ -209,7 +221,30 @@ public class CodeWriter {
         // define function
         // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\n@R13\nM=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\n@R13\nM=M-1\nD=M\n@<fileName>.<functionName>.initLoop\nD;JGT");
         // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\nD=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoop\nD;JGT");
-        commandType2Snippet.put(Parser.C_DEFINE_FUNCTION, "// function <fileName>.<functionName> <nVars>\n(<fileName>.<functionName>)\n@<nVars>\nD=A\n(<fileName>.<functionName>.initLoopIn)\n@<fileName>.<functionName>.pushLocal\nD;JGT\n@<fileName>.<functionName>.initLoopOut\n0;JMP\n(<fileName>.<functionName>.pushLocal)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoopIn\n0;JMP\n(<fileName>.<functionName>.initLoopOut)");
+        // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION, "// function <fileName>.<functionName> <nVars>\n(<fileName>.<functionName>)\n@<nVars>\nD=A\n(<fileName>.<functionName>.initLoopIn)\n@<fileName>.<functionName>.pushLocal\nD;JGT\n@<fileName>.<functionName>.initLoopOut\n0;JMP\n(<fileName>.<functionName>.pushLocal)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoopIn\n0;JMP\n(<fileName>.<functionName>.initLoopOut)");
+        commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <fileName>.<functionName> <nVars>\n(<fileName>.<functionName>)\n@<nVars>\nD=A\n@R13\nM=D\n(<fileName>.<functionName>.initLoopIn)\n@R13\nD=M\n@<fileName>.<functionName>.pushLocal\nD;JGT\n@<fileName>.<functionName>.initLoopOut\n0;JMP\n(<fileName>.<functionName>.pushLocal)\n<<push constant 0>>\n@R13\nM=M-1\n@<fileName>.<functionName>.initLoopIn\n0;JMP\n(<fileName>.<functionName>.initLoopOut)");
+        /*
+         * (<fileName>.<functionName>)
+         * @<nVars>
+         * D=A
+         * @R13
+         * M=D
+         * (<fileName>.<functionName>.initLoopIn)
+         * @R13
+         * D=M
+         * @<fileName>.<functionName>.pushLocal
+         * D;JGT
+         * @<fileName>.<functionName>.initLoopOut
+         * 0;JMP
+         * (<fileName>.<functionName>.pushLocal)
+         * <<push constant 0>> [need be translated into asm]
+         * @R13
+         * M=M-1
+         * @<fileName>.<functionName>.initLoopIn
+         * 0;JMP
+         * (<fileName>.<functionName>.initLoopOut)
+         */
+        
         /*
          * (<fileName>.<functionName>)
          * @<nVars>
@@ -242,7 +277,7 @@ public class CodeWriter {
 
         // call function
         // commandType2Snippet.put(Parser.C_CALL_FUNCTION,"// call <functionName> <nArgs>\\@<fileName>.<functionName>$ret<i>\nD=A\n@R13\nM=D\n<<push R13 0>>\n<<push LCL 0>>\n<<push ARG 0>>\n<<push THIS 0>>\n<<push THAT 0>>\n<<push SP 0>>\n<<push constant <num>>>\n<<sub>>\n<<pop ARG 0>>\n@SP\nD=M\n@LCL\nM=D\n@<calleeFileName>.<calleeFunctionName>\n0;JMP;(<fileName>.<functionName>$ret<i>)");
-        commandType2Snippet.put(Parser.C_CALL_FUNCTION, "// call <fileName>.<functionName> <nArgs>\n@<fileName>.<functionName>$ret<i>\nD=A\n@SP\nM=M+1\nA=M-1\nM=D\n<<push LCL>>\n<<push ARG>>\n<<push THIS>>\n<<push THAT>>\n<<push SP>>\n<<push constant <num>>>\n<<sub>>\n<<pop ARG>>\n@SP\nD=M\n@LCL\nM=D\n@<calleeFileName>.<calleeFunctionName>\n0;JMP\n(<fileName>.<functionName>$ret<i>)");
+        commandType2Snippet.put(Parser.C_CALL_FUNCTION, "// call <calleeFileName>.<calleeFunctionName> <nArgs>\n@<fileName>.<functionName>$ret<i>\nD=A\n@SP\nM=M+1\nA=M-1\nM=D\n<<push LCL>>\n<<push ARG>>\n<<push THIS>>\n<<push THAT>>\n<<push SP>>\n<<push constant <num>>>\n<<sub>>\n<<pop ARG>>\n@SP\nD=M\n@LCL\nM=D\n@<calleeFileName>.<calleeFunctionName>\n0;JMP\n(<fileName>.<functionName>$ret<i>)");
         /*
          * @<fileName>.<functionName>$ret<i>
          * D=A
@@ -292,7 +327,108 @@ public class CodeWriter {
 
         // return
         // commandType2Snippet.put(Parser.C_RETURN, "// return\n<<pop argument 0>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\nA=D\n0;JMP");
-        commandType2Snippet.put(Parser.C_RETURN,"// return\n<<pop ARG>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nA=M-1\nA=M\n0;JMP");
+        // commandType2Snippet.put(Parser.C_RETURN,"// return\n<<pop ARG>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@LCL\nM=D\n@R13\nA=M-1\nA=M\n0;JMP");
+        commandType2Snippet.put(Parser.C_RETURN,"// return\n@LCL\nD=M\n@R13\nM=D\n@5\nD=D-A\nA=D\nD=M\n@R14\nM=D\n<<pop ARG>>\n@ARG\nD=M+1\n@SP\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@LCL\nM=D\n@R14\nD=M\nA=D\n0;JMP");
+        /*
+         * @LCL
+         * D=M
+         * @R13
+         * M=D
+         * 
+         * @5
+         * D=D-A
+         * A=D
+         * D=M
+         * @R14
+         * M=D
+         * 
+         * <<pop ARG>> [POP_SEGMENT_PTR]
+         * 
+         * @ARG
+         * D=M+1
+         * @SP
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @THAT
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @THIS
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @ARG
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @LCL
+         * M=D
+         * 
+         * @R14
+         * D=M
+         * A=D
+         * 0;JMP
+         */
+
+        /*
+         * <<pop ARG>> [POP_SEGMENT_PTR]
+         * 
+         * @ARG
+         * D=M+1
+         * @SP
+         * M=D
+         * 
+         * @LCL
+         * D=M
+         * 
+         * @R13
+         * M=D-1
+         * A=M
+         * D=M
+         * @THAT
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @THIS
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @ARG
+         * M=D
+         * 
+         * @R13
+         * M=M-1
+         * A=M
+         * D=M
+         * @LCL
+         * M=D
+         * 
+         * @R13
+         * A=M-1
+         * A=M
+         * 0;JMP
+         * 
+         */
+        
         /*
          * <<pop ARG>> [POP_SEGMENT_PTR]
          * 

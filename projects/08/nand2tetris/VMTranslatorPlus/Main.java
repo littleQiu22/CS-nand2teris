@@ -75,6 +75,11 @@ public class Main {
             }
             printWriter=new PrintWriter(destFile);
             for(File f:sourceFileList){
+                if(f.isFile() && "Sys.vm".equals(f.getName())){
+                    printWriter.println(CodeWriter.commandType2Snippet.get(Parser.C_BOOTSTRAP));
+                }
+            }
+            for(File f:sourceFileList){
                 if(f.isDirectory() || !(f.getName().endsWith(".vm"))){
                     continue;
                 }
@@ -99,7 +104,9 @@ public class Main {
                 // close resources
                 bufferedReader.close();
             }
+            printWriter.println(CodeWriter.commandType2Snippet.get(Parser.C_END_LOOP));
             // close resources
+            printWriter.flush();
             printWriter.close();
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block

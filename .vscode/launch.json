@@ -50,7 +50,13 @@
             "name": "Launch VMTranslatorPlus",
             "request": "launch",
             "mainClass": "nand2tetris.VMTranslatorPlus.Main",
-            "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/08/FunctionCalls/FibonacciElement"
+            // "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/08/ProgramFlow/BasicLoop/BasicLoop.vm"
+            // "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/08/ProgramFlow/FibonacciSeries/FibonacciSeries.vm"
+            // "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/08/FunctionCalls/SimpleFunction/SimpleFunction.vm"
+            // "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/08/FunctionCalls/StaticsTest"
+            // "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/08/FunctionCalls/FibonacciElement"
+            "args": "/home/littleqjy/workstation/learn/structure/nand2tetris/projects/08/FunctionCalls/NestedCall"
+
         }
     ]
 }

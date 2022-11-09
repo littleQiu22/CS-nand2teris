@@ -6,9 +6,8 @@
 load StaticsTest.asm,
 output-file StaticsTest.out,
 compare-to StaticsTest.cmp,
-output-list RAM[0]%D1.6.1 RAM[261]%D1.6.1 RAM[262]%D1.6.1;
+output-list RAM[0]%D1.6.1 RAM[5]%D1.6.1 RAM[6]%D1.6.1;
 
-set RAM[0] 256,
 
 repeat 2500 {
   ticktock;

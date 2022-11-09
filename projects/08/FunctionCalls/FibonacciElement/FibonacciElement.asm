@@ -1,8 +1,19 @@
+// bootstrap
+@256
+D=A
+@SP
+M=D
+@Sys.init
+0;JMP
 // function Sys.init 0
 (Sys.init)
 @0
 D=A
+@R13
+M=D
 (Sys.init.initLoopIn)
+@R13
+D=M
 @Sys.init.pushLocal
 D;JGT
 @Sys.init.initLoopOut
@@ -15,7 +26,8 @@ D=A
 M=M+1
 A=M-1
 M=D
-D=D-1
+@R13
+M=M-1
 @Sys.init.initLoopIn
 0;JMP
 (Sys.init.initLoopOut)
@@ -26,7 +38,7 @@ D=A
 M=M+1
 A=M-1
 M=D
-// call Sys.init 1
+// call Main.fibonacci 1
 @Sys.init$ret0
 D=A
 @SP
@@ -107,7 +119,11 @@ M=D
 (Main.fibonacci)
 @0
 D=A
+@R13
+M=D
 (Main.fibonacci.initLoopIn)
+@R13
+D=M
 @Main.fibonacci.pushLocal
 D;JGT
 @Main.fibonacci.initLoopOut
@@ -120,7 +136,8 @@ D=A
 M=M+1
 A=M-1
 M=D
-D=D-1
+@R13
+M=M-1
 @Main.fibonacci.initLoopIn
 0;JMP
 (Main.fibonacci.initLoopOut)
@@ -212,6 +229,12 @@ M=M-1
 A=M
 D=M
 @ARG
+M=D
+@R13
+M=M-1
+A=M
+D=M
+@LCL
 M=D
 @R13
 A=M-1
@@ -456,6 +479,12 @@ M=M-1
 A=M
 D=M
 @ARG
+M=D
+@R13
+M=M-1
+A=M
+D=M
+@LCL
 M=D
 @R13
 A=M-1

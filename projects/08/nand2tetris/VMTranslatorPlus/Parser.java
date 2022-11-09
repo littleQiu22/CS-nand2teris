@@ -46,6 +46,7 @@ public class Parser {
     public static final int C_PUSH_SEGMENT_ADDR_WITHOUT_IDX=16;
     public static final int C_POP_SEGMENT_ADDR_WITHOUT_IDX=17;
     public static final int C_POP_SEGMENT_PTR_WITHOUT_IDX=18;
+    public static final int C_BOOTSTRAP=19;
 
     private String command;
 
