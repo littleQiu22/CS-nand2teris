@@ -219,9 +219,6 @@ public class CodeWriter {
          */
 
         // define function
-        // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\n@R13\nM=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\n@R13\nM=M-1\nD=M\n@<fileName>.<functionName>.initLoop\nD;JGT");
-        // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <functionName> <nVars>\n(<fileName>.<functionName>)\nD=<nVars>\n(<fileName>.<functionName>.initLoop)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoop\nD;JGT");
-        // commandType2Snippet.put(Parser.C_DEFINE_FUNCTION, "// function <fileName>.<functionName> <nVars>\n(<fileName>.<functionName>)\n@<nVars>\nD=A\n(<fileName>.<functionName>.initLoopIn)\n@<fileName>.<functionName>.pushLocal\nD;JGT\n@<fileName>.<functionName>.initLoopOut\n0;JMP\n(<fileName>.<functionName>.pushLocal)\n<<push constant 0>>\nD=D-1\n@<fileName>.<functionName>.initLoopIn\n0;JMP\n(<fileName>.<functionName>.initLoopOut)");
         commandType2Snippet.put(Parser.C_DEFINE_FUNCTION,"// function <fileName>.<functionName> <nVars>\n(<fileName>.<functionName>)\n@<nVars>\nD=A\n@R13\nM=D\n(<fileName>.<functionName>.initLoopIn)\n@R13\nD=M\n@<fileName>.<functionName>.pushLocal\nD;JGT\n@<fileName>.<functionName>.initLoopOut\n0;JMP\n(<fileName>.<functionName>.pushLocal)\n<<push constant 0>>\n@R13\nM=M-1\n@<fileName>.<functionName>.initLoopIn\n0;JMP\n(<fileName>.<functionName>.initLoopOut)");
         /*
          * (<fileName>.<functionName>)
@@ -245,38 +242,8 @@ public class CodeWriter {
          * (<fileName>.<functionName>.initLoopOut)
          */
         
-        /*
-         * (<fileName>.<functionName>)
-         * @<nVars>
-         * D=A
-         * (<fileName>.<functionName>.initLoopIn)
-         * @<fileName>.<functionName>.pushLocal
-         * D;JGT
-         * @<fileName>.<functionName>.initLoopOut
-         * 0;JMP
-         * (<fileName>.<functionName>.pushLocal)
-         * <<push constant 0>> [need be translated into asm]
-         * D=D-1
-         * @<fileName>.<functionName>.initLoopIn
-         * 0;JMP
-         * (<fileName>.<functionName>.initLoopOut)
-         */
-        
-        /*
-         * (<fileName>.<functionName>)
-         * @R13
-         * M=<nVars>
-         * (<fileName>.<functionName>.initLoop)
-         * <<push constant 0>> [need be translated into asm]
-         * @R13
-         * M=M-1
-         * D=M
-         * @<fileName>.<functionName>.initLoop
-         * D;JGT
-         */
 
         // call function
-        // commandType2Snippet.put(Parser.C_CALL_FUNCTION,"// call <functionName> <nArgs>\\@<fileName>.<functionName>$ret<i>\nD=A\n@R13\nM=D\n<<push R13 0>>\n<<push LCL 0>>\n<<push ARG 0>>\n<<push THIS 0>>\n<<push THAT 0>>\n<<push SP 0>>\n<<push constant <num>>>\n<<sub>>\n<<pop ARG 0>>\n@SP\nD=M\n@LCL\nM=D\n@<calleeFileName>.<calleeFunctionName>\n0;JMP;(<fileName>.<functionName>$ret<i>)");
         commandType2Snippet.put(Parser.C_CALL_FUNCTION, "// call <calleeFileName>.<calleeFunctionName> <nArgs>\n@<fileName>.<functionName>$ret<i>\nD=A\n@SP\nM=M+1\nA=M-1\nM=D\n<<push LCL>>\n<<push ARG>>\n<<push THIS>>\n<<push THAT>>\n<<push SP>>\n<<push constant <num>>>\n<<sub>>\n<<pop ARG>>\n@SP\nD=M\n@LCL\nM=D\n@<calleeFileName>.<calleeFunctionName>\n0;JMP\n(<fileName>.<functionName>$ret<i>)");
         /*
          * @<fileName>.<functionName>$ret<i>
@@ -301,33 +268,8 @@ public class CodeWriter {
          * 0;JMP
          * (<fileName>.<functionName>$ret<i>)
          */
-        
-        /*
-         * @<fileName>.<functionName>$ret<i>
-         * D=A
-         * @R13
-         * M=D
-         * <<push R13>> [need into asm] [PUSH_SEGMENT_ADDR]
-         * <<push LCL>> [PUSH_SEGMENT_ADDR]
-         * <<push ARG>> [PUSH_SEGMENT_ADDR]
-         * <<push THIS>> [PUSH_SEGMENT_ADDR]
-         * <<push THAT>> [PUSH_SEGMENT_ADDR]
-         * <<push SP>> [PUSH_SEGMENT_ADDR]
-         * <<push constant <num>>>
-         * <<sub>>
-         * <<pop ARG>> [POP_SEGMENT_ADDR]
-         * @SP
-         * D=M
-         * @LCL
-         * M=D
-         * @<calleeFileName>.<calleeFunctionName>
-         * 0;JMP
-         * (<fileName>.<functionName>$ret<i>)
-         */
 
         // return
-        // commandType2Snippet.put(Parser.C_RETURN, "// return\n<<pop argument 0>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\nA=D\n0;JMP");
-        // commandType2Snippet.put(Parser.C_RETURN,"// return\n<<pop ARG>>\n@ARG\nD=M+1\n@SP\nM=D\n@LCL\nD=M\n@R13\nM=D-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@LCL\nM=D\n@R13\nA=M-1\nA=M\n0;JMP");
         commandType2Snippet.put(Parser.C_RETURN,"// return\n@LCL\nD=M\n@R13\nM=D\n@5\nD=D-A\nA=D\nD=M\n@R14\nM=D\n<<pop ARG>>\n@ARG\nD=M+1\n@SP\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THAT\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@ARG\nM=D\n@R13\nM=M-1\nA=M\nD=M\n@LCL\nM=D\n@R14\nD=M\nA=D\n0;JMP");
         /*
          * @LCL
@@ -383,146 +325,6 @@ public class CodeWriter {
          * 0;JMP
          */
 
-        /*
-         * <<pop ARG>> [POP_SEGMENT_PTR]
-         * 
-         * @ARG
-         * D=M+1
-         * @SP
-         * M=D
-         * 
-         * @LCL
-         * D=M
-         * 
-         * @R13
-         * M=D-1
-         * A=M
-         * D=M
-         * @THAT
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @THIS
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @ARG
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @LCL
-         * M=D
-         * 
-         * @R13
-         * A=M-1
-         * A=M
-         * 0;JMP
-         * 
-         */
-        
-        /*
-         * <<pop ARG>> [POP_SEGMENT_PTR]
-         * 
-         * @ARG
-         * D=M+1
-         * @SP
-         * M=D
-         * 
-         * @LCL
-         * D=M
-         * 
-         * @R13
-         * M=D-1
-         * A=M
-         * D=M
-         * @THAT
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @THIS
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @ARG
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @LCL
-         * M=D
-         * 
-         * @R13
-         * A=M-1
-         * A=M
-         * 0;JMP
-         * 
-         */
-        
-        /*
-         * <<pop argument 0>> [POP_SEGMENT_PTR]
-         * 
-         * @ARG
-         * D=M+1
-         * @SP
-         * M=D
-         * 
-         * @LCL
-         * D=M
-         * 
-         * @R13
-         * M=D-1
-         * A=M
-         * D=M
-         * @THAT
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @THIS
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @ARG
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * @LCL
-         * M=D
-         * 
-         * @R13
-         * M=M-1
-         * A=M
-         * D=M
-         * A=D
-         * 0;JMP
-         * 
-         */
-
         // goto label
         commandType2Snippet.put(Parser.C_GOTO,"// goto <labelName>\n@<fileName>.<functionName>$<labelName>\n0;JMP");
         /*
@@ -531,20 +333,11 @@ public class CodeWriter {
          */
 
         // if-goto label
-        // commandType2Snippet.put(Parser.C_IF_GOTO,"// if-goto <label>\n<<pop R13 0>>\n@R13\nD=M\n@<fileName>.<functionName>$<label>\nD;JNE");
         commandType2Snippet.put(Parser.C_IF_GOTO,"// if-goto <labelName>\n@SP\nM=M-1\nA=M\nD=M\n@<fileName>.<functionName>$<labelName>\nD;JNE");
         /*
          * @SP
          * M=M-1
          * A=M
-         * D=M
-         * @<fileName>.<functionName>$<label>
-         * D;JNE 
-         */
-
-        /*
-         * <<pop R13 0>> [POP_SEGMENT_ADDR]
-         * @R13
          * D=M
          * @<fileName>.<functionName>$<label>
          * D;JNE 
