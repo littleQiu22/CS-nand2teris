@@ -1,6 +1,7 @@
 package nand2tetris.SyntaxTranslator.JackTokenizer;
 
 public enum KeyWord {
+    
     CLASS("class"),
     METHOD("method"),
     FUNCTION("function"),
@@ -32,4 +33,5 @@ public enum KeyWord {
     }
 
     public String keyWord;
+    
 }
