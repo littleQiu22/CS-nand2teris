@@ -52,7 +52,7 @@ public class JackTokenizer {
 
     }
 
-    public String identifieer(){
+    public String identifier(){
 
     }
 

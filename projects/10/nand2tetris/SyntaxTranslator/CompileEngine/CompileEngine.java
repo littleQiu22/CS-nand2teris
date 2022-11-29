@@ -12,9 +12,11 @@ import nand2tetris.SyntaxTranslator.JackTokenizer.TokenType;
 public class CompileEngine {
     private JackTokenizer jTokenizer;
     private File targetFile;
-    private static String irreducibleTemplate="<tag> attr </tag>"; 
-    private final static String TEMPLATE_REP_WORD1="tag";
-    private final static String TEMPLATE_REP_WORD2="attr";
+    private final static String TAG_ATTR="<tag> attr </tag>"; 
+    private final static String START_TAG="<tag>";
+    private final static String END_TAG="</tag>";
+    private final static String TAG_STR="tag";
+    private final static String ATTR_STR="attr";
     private PrintWriter pWriter;
 
     public CompileEngine(){}
@@ -42,9 +44,7 @@ public class CompileEngine {
 
     public void compile() throws FileNotFoundException{
         pWriter=new PrintWriter(targetFile);
-        pWriter.println("<class>");
         compileClass();
-        pWriter.println("/class");
         pWriter.close();
     }
 
@@ -52,6 +52,7 @@ public class CompileEngine {
 
     // the whole structure of class
     public void compileClass(){
+        pWriter.println();
         TokenType tokenType=jTokenizer.tokenType();
         // 'class'(\s+)<className>(\s*)'{'(\s)*(<classVarDec(\s)*>*(<subroutineDec>(\s)*)*)*'}'   
         
@@ -60,21 +61,21 @@ public class CompileEngine {
         if(!(TokenType.KEYWORD.equals(tokenType) && jTokenizer.keyword().equals(KeyWord.CLASS))){
             System.out.println("'class' error");
         }else{
-            pWriter.println(irreducibleTemplate.replace(TEMPLATE_REP_WORD1, TokenType.KEYWORD.getToken()).replace(TEMPLATE_REP_WORD2, TokenType.KEYWORD.getToken()));
+            pWriter.println(TAG_ATTR.replace(TAG_STR, TokenType.KEYWORD.getToken()).replace(ATTR_STR, TokenType.KEYWORD.getToken()));
         }
         // <className>
         jTokenizer.advance();
         if(!TokenType.IDENTIFIER.equals(tokenType)){
             System.out.println("<className> error");
         }else{
-            pWriter.println(irreducibleTemplate.replace(TEMPLATE_REP_WORD1,TokenType.IDENTIFIER.getToken()).replace(TEMPLATE_REP_WORD2, jTokenizer.identifieer()));
+            pWriter.println(TAG_ATTR.replace(TAG_STR,TokenType.IDENTIFIER.getToken()).replace(ATTR_STR, jTokenizer.identifier()));
         }
         // '{'
         jTokenizer.advance();
         if(!TokenType.SYMBOL.equals(tokenType) && Symbol.LEFT_CURLY_BRACKET.getSymbol().equals(jTokenizer.symbol())){
             System.out.println("'{'' error");
         }else{
-            pWriter.println(irreducibleTemplate.replace(TEMPLATE_REP_WORD1, TokenType.SYMBOL.getToken()).replace(TEMPLATE_REP_WORD2, Symbol.LEFT_CURLY_BRACKET.getSymbol()));
+            pWriter.println(TAG_ATTR.replace(TAG_STR, TokenType.SYMBOL.getToken()).replace(ATTR_STR, Symbol.LEFT_CURLY_BRACKET.getSymbol()));
         }
 
         // ((<classVarDec>\s*)*(<subroutineDec>\s*)*)*
@@ -83,27 +84,74 @@ public class CompileEngine {
             //  case: <classVarDec>
             if(TokenType.KEYWORD.equals(tokenType) && (KeyWord.STATIC.equals(jTokenizer.keyword())|| KeyWord.FIELD.equals(jTokenizer.keyword()))){
                 compileClassVarDec();
-            }else{
+            }else if(TokenType.KEYWORD.equals(tokenType) && 
+            (KeyWord.CONSTRUCTOR.equals(jTokenizer.keyword()) || KeyWord.FUNCTION.equals(jTokenizer.keyword()) || KeyWord.METHOD.equals(jTokenizer.keyword()))){
                 // case: <subroutineDec>
                 compileSubroutine();
+            }else{
+                break;
             }
         }
-
         jTokenizer.advance();
         if(!TokenType.SYMBOL.equals(tokenType) && Symbol.RIGHT_CURLY_BRACKET.getSymbol().equals(jTokenizer.symbol())){
             System.out.println("'}'' error");
         }else{
-            pWriter.println(irreducibleTemplate.replace(TEMPLATE_REP_WORD1, TokenType.SYMBOL.getToken()).replace(TEMPLATE_REP_WORD2, Symbol.RIGHT_BRACKET.getSymbol()));
+            pWriter.println(TAG_ATTR.replace(TAG_STR, TokenType.SYMBOL.getToken()).replace(ATTR_STR, Symbol.RIGHT_BRACKET.getSymbol()));
         }
     }
 
     // static variable declaration
     public void compileClassVarDec(){
+        // ('static' | 'field')(\s+)<type>(\s+)<varName>(\s*','\s*<varName>)*\s*';' 
+        jTokenizer.advance();
+        TokenType tokenType=jTokenizer.tokenType();
+        // 'static' | 'field'
+        if(TokenType.KEYWORD.equals(tokenType) && (KeyWord.STATIC.equals(jTokenizer.keyword())) || (KeyWord.FIELD.equals(jTokenizer.keyword()))){
+            pWriter.println(TAG_ATTR.replace(TAG_STR, TokenType.KEYWORD.getToken()).replace(ATTR_STR, jTokenizer.keyword().getKeyword()));
+        }
+        // <type>
+        jTokenizer.advance();
+        if(TokenType.KEYWORD.equals(tokenType) && (KeyWord.INT.equals(jTokenizer.keyword()) || KeyWord.CHAR.equals(jTokenizer.keyword()) || KeyWord.BOOLEAN.equals(jTokenizer.keyword()))){
+            pWriter.println(TAG_ATTR.replace(TAG_STR,TokenType.KEYWORD.getToken()).replace(ATTR_STR, jTokenizer.keyword().getKeyword()));
+        }else if(TokenType.IDENTIFIER.equals(tokenType)){
+            pWriter.println(TAG_ATTR.replace(TAG_STR, TokenType.IDENTIFIER.getToken()).replace(ATTR_STR, jTokenizer.identifier()));
+        }
+        // <varName>
+        jTokenizer.advance();
+        if(TokenType.IDENTIFIER.equals(tokenType)){
+            pWriter.println(TAG_ATTR.replace(TAG_STR, TokenType.IDENTIFIER.getToken()).replace(ATTR_STR, jTokenizer.identifier()));
+        }
+        // (','\s*<varName>)*
+        while(jTokenizer.hasToken()){
+            int hasNext=0;
+            // ','
+            jTokenizer.advance();
+            if(TokenType.SYMBOL.equals(tokenType) && Symbol.COMMA.getSymbol().equals(jTokenizer.symbol())){
+                pWriter.println(TAG_ATTR.replace(TAG_STR,TokenType.SYMBOL.getToken()).replace(ATTR_STR, jTokenizer.symbol()));
+                hasNext+=1;
+            }
+            // <varName>
+            jTokenizer.advance();
+            tokenType=jTokenizer.tokenType();
+            if(TokenType.IDENTIFIER.equals(tokenType)){
+                pWriter.println(TAG_ATTR.replace(TAG_STR, TokenType.IDENTIFIER.getToken()).replace(ATTR_STR, jTokenizer.identifier()));
+                hasNext+=1;
+            }
+            if(hasNext<2){
+                break;
+            }
+        }
+        // ';'
+        jTokenizer.advance();
+        if(TokenType.SYMBOL.equals(tokenType) && Symbol.SEMICOLON.getSymbol().equals(jTokenizer.symbol())){
+            pWriter.println(TAG_ATTR.replace(TAG_STR, TokenType.SYMBOL.getToken()).replace(ATTR_STR, jTokenizer.symbol()));
+        }
 
     }
 
     // method, function, constructor
     public void compileSubroutine(){
+        // ('constructor'|'function'|'method')(\s+)('void'|<type>)\s+<subroutineName>\s*'('\s*<parameterList>\s*')'\s*subroutineBody
 
     }
 
