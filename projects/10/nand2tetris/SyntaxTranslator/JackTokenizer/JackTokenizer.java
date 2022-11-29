@@ -1,9 +1,13 @@
 package nand2tetris.SyntaxTranslator.JackTokenizer;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 
 public class JackTokenizer {
     private File f;
+    BufferedReader br;
 
     public JackTokenizer(){}
 
@@ -17,6 +21,10 @@ public class JackTokenizer {
 
     public boolean hasToken(){
 
+    }
+
+    public void read() throws FileNotFoundException{
+        br=new BufferedReader(new FileReader(f));
     }
 
     public void advance(){

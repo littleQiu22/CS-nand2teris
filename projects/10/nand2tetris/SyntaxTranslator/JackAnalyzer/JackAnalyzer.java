@@ -65,6 +65,7 @@ class JackAnalyzer{
         CompileEngine compileEngine=new CompileEngine(jTokenizer);
         for(File ff:fs){
             jTokenizer.setFile(ff);
+            jTokenizer.read();
             File targetFile=new File(ff.getCanonicalPath().replace(".jack", ".xml"));
             compileEngine.setFile(targetFile);
             compileEngine.compile();
