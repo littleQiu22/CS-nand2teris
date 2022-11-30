@@ -19,15 +19,11 @@ public class JackTokenizer {
         this.f=f;
     }
 
-    public boolean hasToken(){
-
-    }
-
     public void read() throws FileNotFoundException{
         br=new BufferedReader(new FileReader(f));
     }
 
-    public void advance(){
+    public boolean advance(){
         // BufferedReader br=null;
         // try{
         //     br=new BufferedReader(new FileReader(ff));
@@ -40,7 +36,7 @@ public class JackTokenizer {
         // }
     }
 
-    public TokenType tokenType(){
+    public TokenWrapper tokenTypeWrapper(){
 
     }
 
